@@ -1,26 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0C0A08;
+  --surface: #171310;
+  --surface-hover: #231D17;
+  --border: #362D23;
+  --primary: #E09145;
+  --primary-mid: #C87D33;
+  --primary-light: rgba(224, 145, 69, 0.10);
+  --accent: #4DBBA8;
+  --accent-light: rgba(77, 187, 168, 0.10);
+  --success: #5CB868;
+  --warning: #E5B84C;
+  --error: #D94F4F;
+  --text-primary: #F2ECE2;
+  --text-secondary: #ADA196;
+  --text-muted: #756B62;
+  --background: var(--bg);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body, #__next {
+  min-height: 100vh;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ant Design token overrides */
+.ant-btn-primary {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+.ant-btn-primary:hover {
+  background-color: var(--primary-mid) !important;
+  border-color: var(--primary-mid) !important;
+}
+
+/* ── Scrollbar — warm minimal ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #362D23; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #4A3F33; }
+
+/* ── Login page ambient animation ── */
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-40px, 30px) scale(1.1); }
+  66% { transform: translate(25px, -25px) scale(0.9); }
+}
+@keyframes float3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, 35px) scale(0.95); }
+  66% { transform: translate(-35px, -15px) scale(1.08); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ── Selection color ── */
+::selection {
+  background: rgba(224, 145, 69, 0.3);
+  color: #F2ECE2;
 }

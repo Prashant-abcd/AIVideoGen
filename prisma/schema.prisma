@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  COORDINATOR
+  SME
+  PEDAGOGY
+  APPROVER
+}
+
+enum ContentState {
+  DRAFT
+  SCRIPT_GENERATING
+  SCRIPT_REVIEW
+  RENDERING
+  PEDAGOGY_REVIEW
+  DUBBING
+  LANGUAGE_QC
+  FINAL_APPROVAL
+  PUBLISHED
+  REJECTED
+}
+
+enum ContentFormat {
+  SHORT
+  EXPLAINER
+}
+
+enum GeneratedBy {
+  LLM
+  HUMAN_EDIT
+}
+
+enum AssetType {
+  MASTER
+  DUB
+}
+
+enum AssetProvider {
+  HEYGEN
+  RUNWAY
+  SARVAM
+  SARVAM_TTS
+  VEO
+  DUBVERSE
+  ELEVENLABS
+  MOCK
+}
+
+enum AssetStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum TaskStatus {
+  OPEN
+  DONE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  role      Role
+  createdAt DateTime @default(now())
+
+  contentItems   ContentItem[]   @relation("CreatedBy")
+  scriptEdits    ScriptVersion[] @relation("EditedBy")
+  tasksCompleted Task[]          @relation("CompletedBy")
+  auditEvents    AuditEvent[]    @relation("Actor")
+}
+
+model Chapter {
+  id               String   @id @default(cuid())
+  classLevel       String
+  subject          String
+  chapterName      String
+  chapterText      String
+  learningOutcomes String[]
+  createdAt        DateTime @default(now())
+
+  contentItems ContentItem[]
+}
+
+model ContentItem {
+  id              String        @id @default(cuid())
+  title           String
+  classLevel      String
+  subject         String
+  chapterId       String
+  learningOutcome String
+  format          ContentFormat
+  state           ContentState  @default(DRAFT)
+  currentVersion  Int           @default(0)
+  mascotId        String?
+  targetLanguages String[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  createdById String
+  createdBy   User    @relation("CreatedBy", fields: [createdById], references: [id])
+  chapter     Chapter @relation(fields: [chapterId], references: [id])
+
+  scriptVersions     ScriptVersion[]
+  renderAssets       RenderAsset[]
+  tasks              Task[]
+  auditEvents        AuditEvent[]
+  analyticsSnapshots AnalyticsSnapshot[]
+}
+
+model ScriptVersion {
+  id            String      @id @default(cuid())
+  contentItemId String
+  versionNo     Int
+  scriptText    String
+  generatedBy   GeneratedBy
+  createdAt     DateTime    @default(now())
+
+  editorId String?
+  editor   User?   @relation("EditedBy", fields: [editorId], references: [id])
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id])
+
+  @@unique([contentItemId, versionNo])
+}
+
+model RenderAsset {
+  id            String        @id @default(cuid())
+  contentItemId String
+  versionNo     Int
+  language      String
+  type          AssetType
+  provider      AssetProvider
+  providerJobId String?
+  status        AssetStatus   @default(PENDING)
+  fileUrl       String?
+  durationSec   Float?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id])
+}
+
+model Task {
+  id            String     @id @default(cuid())
+  contentItemId String
+  stage         String
+  assignedRole  Role
+  status        TaskStatus @default(OPEN)
+  createdAt     DateTime   @default(now())
+  completedAt   DateTime?
+
+  completedById String?
+  completedBy   User?   @relation("CompletedBy", fields: [completedById], references: [id])
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id])
+}
+
+model AuditEvent {
+  id            String        @id @default(cuid())
+  contentItemId String
+  action        String
+  fromState     ContentState?
+  toState       ContentState?
+  comment       String?
+  timestamp     DateTime      @default(now())
+
+  actorId String
+  actor   User   @relation("Actor", fields: [actorId], references: [id])
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id])
+}
+
+model AnalyticsSnapshot {
+  id              String   @id @default(cuid())
+  contentItemId   String
+  language        String
+  views           Int      @default(0)
+  avgViewDuration Float    @default(0)
+  completionPct   Float    @default(0)
+  likes           Int      @default(0)
+  capturedAt      DateTime @default(now())
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id])
+}

@@ -32,10 +32,23 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
 
+# local debug scripts
+/scripts/debug
+
+# generated media output (large, ephemeral)
+/public/videos
+/public/renders
+/public/test.mp4
+/public/test_diagram.jpg
+/public/test_equation.png
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/app/generated/prisma
